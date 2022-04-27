@@ -1,109 +1,91 @@
-#include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
+#include <string>
 
-typedef struct _nodo {
-   int valor;
-   struct _nodo *siguiente;
-} tipoNodo;
+using std::cout; using std::cin;
+using std::endl; using std::string;
 
+struct ListNode {
+    struct ListNode *next{};
+    string data;
+};
 
-typedef tipoNodo *pNodo;
-typedef tipoNodo *Lista;
+struct ListNode *insertNode(struct ListNode *root, string data) {
+    auto new_node = new ListNode;
+    if (root) {
+        while (root->next)
+            root = root->next;
 
-/* Funciones con listas: */
-void Insertar(Lista *l, int v);
-void Borrar(Lista *l, int v);
+        new_node->next = nullptr;
+        new_node->data = std::move(data);
+        root->next = new_node;
 
-int ListaVacia(Lista l);
+        return root->next;
+    }
+    new_node->next = nullptr;
+    new_node->data = std::move(data);
+    return new_node;
+}
 
-void BorrarLista(Lista *);
-void MostrarLista(Lista l);
+int deleteNode(struct ListNode *root, struct ListNode *node) {
+    if (node == nullptr || root == nullptr)
+        return EXIT_FAILURE;
+
+    if (root == node) {
+        if (root->next == nullptr) {
+            delete node;
+            root = nullptr;
+            return EXIT_SUCCESS;
+        }
+
+        node = root->next;
+        root->data = root->next->data;
+        root->next = root->next->next;
+        delete node;
+        return EXIT_SUCCESS;
+    }
+
+    auto prev = root;
+    while (prev->next != node && prev->next != nullptr) {
+        prev = prev->next;
+    }
+
+    prev->next = node->next;
+    delete node;
+    return EXIT_SUCCESS;
+}
+
+void freeNodes(struct ListNode *root) {
+    struct ListNode *tmp = nullptr;
+    while (root) {
+        tmp = root;
+        root = root->next;
+        delete tmp;
+    }
+}
+
+void printNodes(struct ListNode *node) {
+    auto count = 0;
+    while (node){
+        cout << "Tarea " << count << " - es: " << node->data << endl;
+        node = node->next;
+        count++;
+    }
+}
 
 int main() {
-   Lista lista = NULL;
-   pNodo p;
-//////////////se insertan los numeros /////////////
-   Insertar(&lista, 20);
-   Insertar(&lista, 10);
-   Insertar(&lista, 40);
-   Insertar(&lista, 30);
+    struct ListNode *head = nullptr;
+    head = insertNode(head, "eat");
 
-   MostrarLista(lista);
-//////////////////Aqui se borra /////////
-   Borrar(&lista, 10);
-   /*
-   Borrar(&lista, 30);
-   Borrar(&lista, 40);*/
+    //nodo que se va a eliminar por cumplir tarea 
 
-   MostrarLista(lista);
+    auto iter = insertNode(head, "to mop the floor");
+    insertNode(head, "Make a homework");
+    printNodes(head);
+    cout << " ----------------------------------- " << endl;
 
-   BorrarLista(&lista);
+    deleteNode(head, iter);
+    printNodes(head);
 
-   return 0;
-}
-
-void Insertar(Lista *lista, int v) {
-   pNodo nuevo, anterior;
-
-   
-   nuevo = (pNodo)malloc(sizeof(tipoNodo));
-   nuevo->valor = v;
-
-   if(ListaVacia(*lista) || (*lista)->valor > v) {
-      nuevo->siguiente = *lista;
-      *lista = nuevo;
-   } else {
-
-      anterior = *lista;
-      while(anterior->siguiente && anterior->siguiente->valor <= v)
-         anterior = anterior->siguiente;
-      nuevo->siguiente = anterior->siguiente;
-      anterior->siguiente = nuevo;
-   }
-}
-
-void Borrar(Lista *lista, int v) {
-   pNodo anterior, nodo;
-
-   nodo = *lista;
-   anterior = NULL;
-   while(nodo && nodo->valor < v) {
-      anterior = nodo;
-      nodo = nodo->siguiente;
-   }
-   if(!nodo || nodo->valor != v) return;
-   else {
-      if(!anterior) 
-         *lista = nodo->siguiente;
-      else 
-         anterior->siguiente = nodo->siguiente;
-      free(nodo);
-   }
-}
-
-int ListaVacia(Lista lista) {
-   return (lista == NULL);
-}
-
-void BorrarLista(Lista *lista) {
-   pNodo nodo;
-
-   while(*lista) {
-      nodo = *lista;
-      *lista = nodo->siguiente;
-      free(nodo);
-   }
-}
-
-void MostrarLista(Lista lista) {
-   pNodo nodo = lista;
-
-   if(ListaVacia(lista)) printf("Lista vacía\n");
-   else {
-      while(nodo) {
-         printf("%d -> ", nodo->valor);
-         nodo = nodo->siguiente;
-     }
-     printf("\n");
-   }
+    freeNodes(head);
+    return EXIT_SUCCESS;
 }
